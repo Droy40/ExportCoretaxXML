@@ -44,10 +44,6 @@ Thumbs.db
 *.ipdb
 *.dmp
 
-# Windows Forms Designer
-*.resx
-*.Designer.cs
-
 # User-Specific Files
 *.suo
 *.psess
