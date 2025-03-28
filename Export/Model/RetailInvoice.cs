@@ -23,7 +23,6 @@ namespace Export.Model
         public string TransactionDateString
         {
             get => TransactionDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-            set => TransactionDate = DateTime.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
         [XmlIgnore]
         public DateTime TransactionDate { get; set; }

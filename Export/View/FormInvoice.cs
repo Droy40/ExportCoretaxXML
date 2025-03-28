@@ -2,6 +2,7 @@ using Export.View;
 using Export.ViewModel;
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Forms;
 
 namespace Export
@@ -84,6 +85,11 @@ namespace Export
 
         private void btnXMLExport_Click(object sender, EventArgs e)
         {
+            if (!(_viewModel.StartDate.Value.Month == _viewModel.EndDate.Value.Month && _viewModel.StartDate.Value.Year == _viewModel.EndDate.Value.Year))
+            {
+                MessageBox.Show("Ekspor hanya bisa dilakukan di periode bulan dan tahun yang sama!");
+                return;
+            }
             FormXMLExport frmExport = new FormXMLExport(                
                 _viewModel.StartDate.Value, 
                 _viewModel.EndDate.Value);

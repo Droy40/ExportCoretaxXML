@@ -136,7 +136,7 @@ namespace Export.ViewModel
 
             return selectedInvoices;
         }
-        public Boolean ExportToXml(String TIN = "")
+        public Boolean ExportToXml(String TIN,int serialNoStart)
         {
             List<RetailInvoice> allData = GetSelectedInvoices();
 
@@ -145,9 +145,16 @@ namespace Export.ViewModel
                 throw new Exception("Tidak ada data untuk diekspor!");
             }
 
+            Random rand = new Random();
+            foreach(RetailInvoice item in allData)
+            {
+                item.SerialNo = $"{StartDate.Value.Year.ToString()}-{serialNoStart++}";
+                item.BuyerName = NamaDummy.names[rand.Next(NamaDummy.names.Length)];
+            }
+
             RetailInvoiceExport toExport = new RetailInvoiceExport()
             {
-                TIN = "NO_NPWP",
+                TIN = TIN,
                 TaxPeriodMonth = StartDate.Value.Month,
                 TaxPeriodYear = StartDate.Value.Year,
                 ListOfRetailInvoice = new RetailInvoiceList

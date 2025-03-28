@@ -24,10 +24,20 @@ namespace Export.View
 
         public FormXMLExport( DateTime startDate, DateTime endDate) : this()
         {            
+            lblBulan.Text = startDate.Month.ToString();
+            lblTahun.Text = startDate.Year.ToString();
             _viewModel = new XMLExportViewModel(startDate, endDate);
             LoadLabel();
             dataGridView1.DataSource = _viewModel.ExportSelections;
             FormatDataGrid();
+            // Set semua kolom sebagai ReadOnly terlebih dahulu
+            foreach (DataGridViewColumn column in dataGridView1.Columns)
+            {
+                column.ReadOnly = true;
+            }
+
+            // Hanya kolom "ExportPercentage" yang bisa diedit
+            dataGridView1.Columns["ExportPercentage"].ReadOnly = false;
         }
         private void FormatDataGrid()
         {
@@ -64,7 +74,13 @@ namespace Export.View
         {
             try
             {
-                if (_viewModel.ExportToXml())
+                int serialNoStart;
+                if (!int.TryParse(txtSerialNoStart.Text,out serialNoStart))
+                {
+                    MessageBox.Show("Serial No Start harus Angka!!");
+                    return;
+                }
+                if (_viewModel.ExportToXml("NPWP",serialNoStart))
                 {
                     MessageBox.Show("Export Berhasil");
                 }
