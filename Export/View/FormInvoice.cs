@@ -1,3 +1,4 @@
+using Export.View;
 using Export.ViewModel;
 using System;
 using System.Globalization;
@@ -83,22 +84,11 @@ namespace Export
 
         private void btnXMLExport_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (_viewModel.ExportToXml())
-                {
-                    MessageBox.Show("Export Berhasil");
-                }
-                else
-                {
-                    MessageBox.Show("Export Gagal");
-                }
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show("Error : " + ex.Message);
-            }
-            
+            FormXMLExport frmExport = new FormXMLExport(                
+                _viewModel.StartDate.Value, 
+                _viewModel.EndDate.Value);
+            frmExport.Owner = this;
+            frmExport.Show();                     
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -13,6 +14,7 @@ namespace Export.ViewModel
 {
     public class RetailInvoiceViewModel : INotifyPropertyChanged
     {
+        private BindingList<InvoiceExportSelection> _exportSelections;
         private BindingList<RetailInvoice> _retailInvoice;
         private int _totalRecords = 0;
         private int _currentPage = 1;
@@ -21,6 +23,11 @@ namespace Export.ViewModel
         private DateTime? _startDate;
         private DateTime? _endDate;
 
+        public BindingList<InvoiceExportSelection> ExportSelections
+        {
+            get { return _exportSelections; }
+            set { _exportSelections = value; OnPropertyChanged(); }
+        }
         public BindingList<RetailInvoice> RetailInvoice
         {
             get { return _retailInvoice; }
@@ -55,17 +62,54 @@ namespace Export.ViewModel
 
         public RetailInvoiceViewModel()
         {
+            ExportSelections = new BindingList<InvoiceExportSelection>();
             RetailInvoice = new BindingList<RetailInvoice>();
             StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             EndDate = DateTime.Now;
             LoadTotalPages();
+            LoadExportSelections();
         }
         public void LoadTotalPages()
         {
             TotalRecords = RetailInvoiceRepository.GetTotalRecords(StartDate, EndDate);
             TotalPages = (int)System.Math.Ceiling((double)TotalRecords / _pageSize);
         }
+        public void LoadExportSelections()
+        {
+            if (StartDate == null || EndDate == null) return;
+            
+            var groupedByDate = RetailInvoice
+                .GroupBy(i => i.TransactionDate)
+                .Select(g => new InvoiceExportSelection
+                {
+                    Date = g.Key,
+                    TotalInvoices = g.Count(),
+                    ExportPercentage = 100,
+                    TotalVAT = g.Sum(i => i.VAT),
+                    ExportVAT = g.Sum(i => i.VAT)
+                })
+                .ToList();
 
+            ExportSelections.Clear();
+            foreach (var item in groupedByDate)
+            {
+                ExportSelections.Add(item);
+            }
+        }
+        public void UpdateExportVAT()
+        {
+            foreach (var selection in ExportSelections)
+            {
+                var allInvoices = RetailInvoice
+                    .Where(i => i.TransactionDate == selection.Date)
+                    .OrderByDescending(i => i.TransactionDate)
+                    .Take((int)Math.Ceiling(selection.TotalInvoices * (selection.ExportPercentage / 100.0)))
+                    .ToList();
+
+                selection.ExportVAT = allInvoices.Sum(i => i.VAT);
+            }
+            OnPropertyChanged(nameof(ExportSelections));
+        }
         public void LoadData()
         {
             List<RetailInvoice> retailInvoiceFromDb = RetailInvoiceRepository.GetRetailInvoice(CurrentPage, _pageSize,StartDate,EndDate);
